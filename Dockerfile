@@ -1,16 +1,17 @@
 # Install the base requirements for the app.
 # This stage is to support development.
-FROM --platform=$BUILDPLATFORM python:alpine AS base
+FROM --platform=$BUILDPLATFORM python:3.10-slim AS base
 WORKDIR /app
 
 # Salin dulu file dari host (workspace Jenkins)
 COPY requirements.txt .
 
-# Debugging setelah file disalin
+# Debug isi file requirements.txt (untuk log Jenkins)
 RUN echo "Isi file requirements.txt:" && cat requirements.txt
 
 # Install dependencies Python
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
 FROM --platform=$BUILDPLATFORM node:18-alpine AS app-base
 WORKDIR /app
@@ -45,6 +46,3 @@ RUN mkdocs build
 FROM --platform=$TARGETPLATFORM nginx:alpine
 COPY --from=app-zip-creator /app.zip /usr/share/nginx/html/assets/app.zip
 COPY --from=build /app/site /usr/share/nginx/html
-
-
-
