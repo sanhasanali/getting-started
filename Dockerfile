@@ -2,7 +2,14 @@
 # This stage is to support development.
 FROM --platform=$BUILDPLATFORM python:alpine AS base
 WORKDIR /app
+
+# Salin dulu file dari host (workspace Jenkins)
 COPY requirements.txt .
+
+# Debugging setelah file disalin
+RUN echo "Isi file requirements.txt:" && cat requirements.txt
+
+# Install dependencies Python
 RUN pip install -r requirements.txt
 
 FROM --platform=$BUILDPLATFORM node:18-alpine AS app-base
@@ -39,15 +46,5 @@ FROM --platform=$TARGETPLATFORM nginx:alpine
 COPY --from=app-zip-creator /app.zip /usr/share/nginx/html/assets/app.zip
 COPY --from=build /app/site /usr/share/nginx/html
 
-# Install the base requirements for the app.
-# This stage is to support development.
-FROM --platform=$BUILDPLATFORM python:alpine AS base
-WORKDIR /app
 
-# Debugging: Cek file requirements.txt ada atau tidak
-RUN echo "Isi direktori /app:" && ls -l /app
-RUN echo "Isi file requirements.txt:" && cat requirements.txt
-
-COPY requirements.txt .
-RUN pip install -r requirements.txt
 
